@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="nl.nnworks.nnembedded.project.nature.NaturePropertyTester"
+            id="NNEmbeddedPlugin.hasNNEmbeddedNature"
+            namespace="nl.nnworks.nnembedded.project.nature"
+            properties="hasNNEmbeddedNature"
+            type="java.lang.Object">
+      </propertyTester>
+   </extension>
    <extension 
          id="nnembeddednature"
          name="NNWorks Embedded Nature"
@@ -33,7 +43,16 @@
          <command
                commandId="nl.nnworks.nnembedded.nature.convertcommand"
                label="Convert to NNEmbedded Project"
-               style="push">
+               style="push"
+               tooltip="tooltip">
+            <visibleWhen>
+               <!-- forcePluginActivation needed because else the property tester is not initialized -->
+               <test
+                     forcePluginActivation="true"
+                     property="nl.nnworks.nnembedded.project.nature.hasNNEmbeddedNature"
+                     value="false">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
