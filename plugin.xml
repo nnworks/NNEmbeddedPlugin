@@ -5,9 +5,9 @@
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
             class="nl.nnworks.nnembedded.project.nature.NaturePropertyTester"
-            id="NNEmbeddedPlugin.hasNNEmbeddedNature"
+            id="NNEmbeddedPlugin.isNNEmbeddedNatureApplicable"
             namespace="nl.nnworks.nnembedded.project.nature"
-            properties="hasNNEmbeddedNature"
+            properties="canAddNNEmbeddedNature, hasNNEmbeddedNature"
             type="java.lang.Object">
       </propertyTester>
    </extension>
@@ -20,20 +20,20 @@
          <run class="nl.nnworks.nnembedded.project.nature.NNEmbeddedProjectNature" />
       </runtime>
       
-      <requires-nature id="org.eclipse.cdt.core.ccnature" />
 
    </extension>
    <extension
-         id="nl.nnworks.nnembedded.nature.convertcommand"
-         name="Convert to NNEmbedded project"
          point="org.eclipse.ui.commands">
-   </extension>
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="nl.nnworks.nnembedded.project.nature.ConvertCommand"
-            commandId="nl.nnworks.nnembedded.nature.convertcommand">
-      </handler>
+      <command
+            defaultHandler="nl.nnworks.nnembedded.project.nature.ConvertCommand"
+            id="nl.nnworks.nnembedded.nature.addnature"
+            name="AddNature">
+      </command>
+      <command
+            defaultHandler="nl.nnworks.nnembedded.project.nature.ConvertCommand"
+            id="nl.nnworks.nnembedded.nature.removenature"
+            name="RemoveNature">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -41,19 +41,34 @@
             allPopups="true"
             locationURI="popup:org.eclipse.ui.projectConfigure">
          <command
-               commandId="nl.nnworks.nnembedded.nature.convertcommand"
-               label="Convert to NNEmbedded Project"
+               commandId="nl.nnworks.nnembedded.nature.addnature"
+               label="Add NNEmbedded nature"
                style="push"
                tooltip="tooltip">
             <visibleWhen>
                <!-- forcePluginActivation needed because else the property tester is not initialized -->
                <test
                      forcePluginActivation="true"
-                     property="nl.nnworks.nnembedded.project.nature.hasNNEmbeddedNature"
+                     property="nl.nnworks.nnembedded.project.nature.canAddNNEmbeddedNature"
                      value="false">
                </test>
             </visibleWhen>
          </command>
+         <command
+               commandId="nl.nnworks.nnembedded.nature.removenature"
+               label="Remove NNEmbedded nature"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="nl.nnworks.nnembedded.project.nature.canRemoveNNEmbeddedNature">
+               </test>
+            </visibleWhen>
+         </command>
       </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
    </extension>
 </plugin>
