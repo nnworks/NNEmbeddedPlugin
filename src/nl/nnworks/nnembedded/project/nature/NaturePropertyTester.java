@@ -25,6 +25,7 @@ public class NaturePropertyTester extends org.eclipse.core.expressions.PropertyT
         try {
           if (obj instanceof IProject) {
             IProject project = (IProject) obj; 
+            System.out.println(property);
             if (CANADDNNEMBEDDEDNATURE_PROERTY.equals(property)) {
               if (hasCorCppNature(project) && (project.getNature(NNEmbeddedProjectNature.NATURE_ID) == null)) {
                 return true;

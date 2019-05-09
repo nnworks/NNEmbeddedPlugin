@@ -49,8 +49,7 @@
                <!-- forcePluginActivation needed because else the property tester is not initialized -->
                <test
                      forcePluginActivation="true"
-                     property="nl.nnworks.nnembedded.project.nature.canAddNNEmbeddedNature"
-                     value="false">
+                     property="nl.nnworks.nnembedded.project.nature.canAddNNEmbeddedNature">
                </test>
             </visibleWhen>
          </command>
@@ -58,8 +57,8 @@
                commandId="nl.nnworks.nnembedded.nature.removenature"
                label="Remove NNEmbedded nature"
                style="push">
-            <visibleWhen
-                  checkEnabled="false">
+            <visibleWhen>
+               <!-- forcePluginActivation needed because else the property tester is not initialized -->
                <test
                      forcePluginActivation="true"
                      property="nl.nnworks.nnembedded.project.nature.hasNNEmbeddedNature">
@@ -67,5 +66,20 @@
             </visibleWhen>
          </command>
       </menuContribution>
+   </extension>
+   <extension
+         id="MainPropertyPage"
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="nl.nnworks.nnembedded.project.nature.configuration.PropertyPage"
+            id="nl.nnworks.nnembedded.project.nature.propertypage"
+            name="NNEmbedded Properties">
+         <enabledWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="nl.nnworks.nnembedded.project.nature.hasNNEmbeddedNature">
+            </test>
+         </enabledWhen>
+      </page>
    </extension>
 </plugin>
