@@ -12,7 +12,7 @@
       </propertyTester>
    </extension>
    <extension 
-         id="nnembeddednature"
+         id="nl.nnworks.nnembedded.project.nature"
          name="NNWorks Embedded Nature"
          point="org.eclipse.core.resources.natures">
          
@@ -25,12 +25,12 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="nl.nnworks.nnembedded.project.nature.ConvertCommand"
+            defaultHandler="nl.nnworks.nnembedded.project.nature.NatureCommandHandler"
             id="nl.nnworks.nnembedded.nature.addnature"
             name="AddNature">
       </command>
       <command
-            defaultHandler="nl.nnworks.nnembedded.project.nature.ConvertCommand"
+            defaultHandler="nl.nnworks.nnembedded.project.nature.NatureCommandHandler"
             id="nl.nnworks.nnembedded.nature.removenature"
             name="RemoveNature">
       </command>
@@ -62,13 +62,10 @@
                   checkEnabled="false">
                <test
                      forcePluginActivation="true"
-                     property="nl.nnworks.nnembedded.project.nature.canRemoveNNEmbeddedNature">
+                     property="nl.nnworks.nnembedded.project.nature.hasNNEmbeddedNature">
                </test>
             </visibleWhen>
          </command>
       </menuContribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commands">
    </extension>
 </plugin>
