@@ -83,20 +83,11 @@ public class NatureCommandHandler implements IHandler {
       System.arraycopy(currentNatures, 0, newNatures, 0, currentNatures.length);
       newNatures[newNatures.length - 1] = natureId;
 
-      // validate the natures
-      IWorkspace workspace = ResourcesPlugin.getWorkspace();
-      IStatus status = workspace.validateNatureSet(newNatures);
-
-      // if all is OK, apply the new nature list
-      if (status.getCode() == IStatus.OK) {
-        description.setNatureIds(newNatures);
-        project.setDescription(description, null);
+      if (validateAndApplyNatures(project, description, newNatures) == true) {
         return newNatures;
       } else {
-        // TODO logging
+        return currentNatures;
       }
-      
-      return currentNatures;
     } catch (CoreException e) {
       // TODO logging
     }
@@ -108,29 +99,36 @@ public class NatureCommandHandler implements IHandler {
     IProjectDescription description;
     try {
       description = project.getDescription();
-      // copy natures array and add the new one
+      // remove specified nature
       String[] currentNatures = description.getNatureIds();
       String[] newNatures = Arrays.stream(currentNatures).filter((nature) -> { return ! natureIdToRemove.equals(nature); }).collect(Collectors.toList()).toArray(new String[0]); 
 
-      // validate the natures
-      IWorkspace workspace = ResourcesPlugin.getWorkspace();
-      IStatus status = workspace.validateNatureSet(newNatures);
-
-      // if all is OK, apply the new nature list
-      if (status.getCode() == IStatus.OK) {
-        description.setNatureIds(newNatures);
-        project.setDescription(description, null);
+      if (validateAndApplyNatures(project, description, newNatures) == true) {
         return newNatures;
       } else {
-        // TODO logging
+        return currentNatures;
       }
-      
-      return currentNatures;
     } catch (CoreException e) {
       // TODO logging
     }
     
     return null;
+  }
+  
+  private boolean validateAndApplyNatures(final IProject project, final IProjectDescription description, final String[] natures) throws CoreException {
+    // validate the natures
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
+    IStatus status = workspace.validateNatureSet(natures);
+
+    // if all is OK, apply the new nature list
+    if (status.getCode() == IStatus.OK) {
+      description.setNatureIds(natures);
+      project.setDescription(description, null);
+      return true;
+    } else {
+      // TODO logging
+      return false;
+    }
   }
   
 }
