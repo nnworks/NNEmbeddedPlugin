@@ -22,30 +22,39 @@ public class NaturePropertyTester extends org.eclipse.core.expressions.PropertyT
     if (receiver instanceof List) {
       List<?> receiverList = (List<?>) receiver;
       for (Object obj: receiverList) {
-        try {
           if (obj instanceof IProject) {
-            IProject project = (IProject) obj; 
-            System.out.println(property);
-            if (CANADDNNEMBEDDEDNATURE_PROERTY.equals(property)) {
-              if (hasCorCppNature(project) && (project.getNature(NNEmbeddedProjectNature.NATURE_ID) == null)) {
-                return true;
-              }
-            } else if (HASNNEMBEDDEDNATURE_PROPERTY.equals(property)) {
-              if (project.getNature(NNEmbeddedProjectNature.NATURE_ID) != null) {
-                return true;
-              }
-            }
+            IProject project = (IProject) obj;
+            return handleTestForProject(project, property);
           }
-        } catch (CoreException e) {
-          // TODO: fix this
-          OperationStatus status = new OperationStatus(1, "blabla", 3, "something went wrong", null);
-          StatusManager.getManager().handle(status, StatusManager.LOG);
-        }        
       }
+    } else if (receiver instanceof IProject) {
+      IProject project = (IProject) receiver;
+      return handleTestForProject(project, property);
     }
-    
+
     return false;
   }
+  
+	private boolean handleTestForProject(final IProject project, final String property) {
+		System.out.println(property);
+		try {
+			if (CANADDNNEMBEDDEDNATURE_PROERTY.equals(property)) {
+				if (hasCorCppNature(project) && (project.getNature(NNEmbeddedProjectNature.NATURE_ID) == null)) {
+					return true;
+				}
+			} else if (HASNNEMBEDDEDNATURE_PROPERTY.equals(property)) {
+				if (project.getNature(NNEmbeddedProjectNature.NATURE_ID) != null) {
+					return true;
+				}
+			}
+		} catch (CoreException e) {
+			// TODO: fix this
+			OperationStatus status = new OperationStatus(1, "blabla", 3, "something went wrong", null);
+			StatusManager.getManager().handle(status, StatusManager.LOG);
+		}
+
+		return false;
+	}  
   
   private boolean hasCorCppNature(IProject project) throws CoreException {
 
