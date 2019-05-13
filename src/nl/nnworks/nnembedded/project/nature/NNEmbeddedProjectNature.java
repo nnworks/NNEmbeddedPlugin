@@ -6,32 +6,37 @@ import org.eclipse.core.runtime.CoreException;
 
 public class NNEmbeddedProjectNature implements IProjectNature {
 
-    public static final String NATURE_ID = "nl.nnworks.nnembedded.project.nature";
-    public static final String CNATURE_ID = "org.eclipse.cdt.core.cnature";
-    public static final String CCNATURE_ID = "org.eclipse.cdt.core.ccnature";
-	
-    private IProject project;    
-    
+  public static final String NATURE_ID = "nl.nnworks.nnembedded.project.nature";
+  public static final String CNATURE_ID = "org.eclipse.cdt.core.cnature";
+  public static final String CCNATURE_ID = "org.eclipse.cdt.core.ccnature";
+
+  private IProject project;
+
+  /**
+     * Called when this nature is added to a project 
+     */
 	@Override
 	public void configure() throws CoreException {
-		// TODO Auto-generated method stub
-
+		System.out.println("configure nature");
 	}
 
-	@Override
-	public void deconfigure() throws CoreException {
-		// TODO Auto-generated method stub
+  /**
+   * Called when this nature is removed from a project
+   */
+  @Override
+  public void deconfigure() throws CoreException {
+    System.out.println("deconfigure nature");
+  }
 
-	}
+  @Override
+  public IProject getProject() {
+    return project;
+  }
 
-	@Override
-	public IProject getProject() {
-		return project;
-	}
-
-	@Override
-	public void setProject(IProject project) {
-		this.project = project;
-	}
+  @Override
+  public void setProject(IProject project) {
+    System.out.println("set project on nature");
+    this.project = project;
+  }
 
 }

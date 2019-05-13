@@ -48,7 +48,7 @@
             <visibleWhen>
                <!-- forcePluginActivation needed because else the property tester is not initialized -->
                <test
-                     sforcePluginActivation="true"
+                     forcePluginActivation="true"
                      property="nl.nnworks.nnembedded.project.nature.canAddNNEmbeddedNature">
                </test>
             </visibleWhen>
@@ -60,8 +60,8 @@
             <visibleWhen>
 	           <!-- forcePluginActivation needed because else the property tester is not initialized -->
 	           <test
-	                 sforcePluginActivation="true"
-                     property="nl.nnworks.nnembedded.project.nature.hasNNEmbeddedNature">
+                  forcePluginActivation="true"
+                  property="nl.nnworks.nnembedded.project.nature.hasNNEmbeddedNature">
               </test>
             </visibleWhen>
          </command>
