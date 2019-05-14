@@ -4,32 +4,32 @@
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
-            class="nl.nnworks.nnembedded.plugin.nature.NaturePropertyTester"
+            class="nl.nnworks.nnembedded.plugin.PluginPropertyTester"
             id="NNEmbeddedPlugin.isNNEmbeddedNatureApplicable"
-            namespace="nl.nnworks.nnembedded.plugin.nature"
-            properties="canAddNNEmbeddedNature, hasNNEmbeddedNature"
+            namespace="nl.nnworks.nnembedded.plugin"
+            properties="canAddNNEmbeddedNature, hasNNEmbeddedNature, isApplicablePropertyResource"
             type="java.lang.Object">
       </propertyTester>
    </extension>
    <extension 
-         id="nl.nnworks.nnembedded.plugin.nature"
+         id="nl.nnworks.nnembedded.plugin"
          name="NNWorks Embedded Nature"
          point="org.eclipse.core.resources.natures">
          
       <runtime>
-         <run class="nl.nnworks.nnembedded.plugin.nature.NNEmbeddedProjectNature" />
+         <run class="nl.nnworks.nnembedded.plugin.NNEmbeddedProjectNature" />
       </runtime>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="nl.nnworks.nnembedded.plugin.nature.NatureCommandHandler"
-            id="nl.nnworks.nnembedded.plugin.nature.addnature"
+            defaultHandler="nl.nnworks.nnembedded.plugin.NatureCommandHandler"
+            id="nl.nnworks.nnembedded.plugin.addnature"
             name="AddNature">
       </command>
       <command
-            defaultHandler="nl.nnworks.nnembedded.plugin.nature.NatureCommandHandler"
-            id="nl.nnworks.nnembedded.plugin.nature.removenature"
+            defaultHandler="nl.nnworks.nnembedded.plugin.NatureCommandHandler"
+            id="nl.nnworks.nnembedded.plugin.removenature"
             name="RemoveNature">
       </command>
    </extension>
@@ -39,7 +39,7 @@
             allPopups="true"
             locationURI="popup:org.eclipse.ui.projectConfigure">
          <command
-               commandId="nl.nnworks.nnembedded.plugin.nature.addnature"
+               commandId="nl.nnworks.nnembedded.plugin.addnature"
                label="Add NNEmbedded nature"
                style="push"
                tooltip="Add NNEmdedded nature to project">
@@ -47,12 +47,12 @@
                <!-- forcePluginActivation needed because else the property tester is not initialized -->
                <test
                      forcePluginActivation="true"
-                     property="nl.nnworks.nnembedded.plugin.nature.canAddNNEmbeddedNature">
+                     property="nl.nnworks.nnembedded.plugin.canAddNNEmbeddedNature">
                </test>
             </visibleWhen>
          </command>
          <command
-               commandId="nl.nnworks.nnembedded.plugin.nature.removenature"
+               commandId="nl.nnworks.nnembedded.plugin.removenature"
                label="Remove NNEmbedded nature"
                style="push"
                tooltip="Remove NNEmbedded nature from project">
@@ -60,24 +60,33 @@
 	           <!-- forcePluginActivation needed because else the property tester is not initialized -->
 	           <test
                   forcePluginActivation="true"
-                  property="nl.nnworks.nnembedded.plugin.nature.hasNNEmbeddedNature">
+                  property="nl.nnworks.nnembedded.plugin.hasNNEmbeddedNature">
               </test>
             </visibleWhen>
          </command>
       </menuContribution>
    </extension>
    <extension
-         id="MainPropertyPage"
+         id="mainprojectpropertypage"
          point="org.eclipse.ui.propertyPages">
       <page
-            class="nl.nnworks.nnembedded.plugin.config.ui.PropertyPage"
-            id="nl.nnworks.nnembedded.plugin.nature.propertypage"
+            class="nl.nnworks.nnembedded.plugin.config.ui.ProjectPropertyPage"
+            id="nl.nnworks.nnembedded.plugin.projectpropertiespage"
             name="NNEmbedded Properties">
 		<enabledWhen>
-		        <test 
-		              forcePluginActivation="true"
-		              property="nl.nnworks.nnembedded.plugin.nature.hasNNEmbeddedNature">
-		        </test>
+	       <and>
+	          <test
+	                args="nl.nnworks.nnembedded.plugin.projectpropertiespage"
+	                forcePluginActivation="true"
+	                property="nl.nnworks.nnembedded.plugin.isApplicablePropertyResource">
+              </test>
+	          <and>
+	             <test
+	                   forcePluginActivation="true"
+	                   property="nl.nnworks.nnembedded.plugin.hasNNEmbeddedNature">
+	             </test>
+	          </and>
+	       </and>
 		</enabledWhen>
       </page>
    </extension>

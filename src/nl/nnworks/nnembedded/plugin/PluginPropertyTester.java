@@ -1,4 +1,4 @@
-package nl.nnworks.nnembedded.plugin.nature;
+package nl.nnworks.nnembedded.plugin;
 
 import java.util.List;
 
@@ -8,36 +8,54 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.ui.statushandlers.StatusManager;
 
-import nl.nnworks.nnembedded.plugin.Activator;
+import nl.nnworks.nnembedded.plugin.config.ui.ProjectPropertyPage;
+import nl.nnworks.nnembedded.plugin.nature.NNEmbeddedProjectNature;
 
-public class NaturePropertyTester extends org.eclipse.core.expressions.PropertyTester {
+public class PluginPropertyTester extends org.eclipse.core.expressions.PropertyTester {
 
   public static final String CANADDNNEMBEDDEDNATURE_PROERTY = "canAddNNEmbeddedNature";
   public static final String HASNNEMBEDDEDNATURE_PROPERTY = "hasNNEmbeddedNature";
+  public static final String ISAPPLICABLEPROPERTYRESOURCE_PROPERTY = "isApplicablePropertyResource";
 
-  public NaturePropertyTester() {
+  public PluginPropertyTester() {
   }
 
   @Override
   public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
 
-    if (receiver instanceof List) {
+    if (ISAPPLICABLEPROPERTYRESOURCE_PROPERTY.equals(property)) {
+      if (receiver instanceof List) {
+        List<?> receiverList = (List<?>) receiver;
+        for (Object obj : receiverList) {
+            return handleApplicableResourceTest(obj, property, args, expectedValue);
+        }
+      } else {
+        return handleApplicableResourceTest(receiver, property, args, expectedValue);
+      }
+    } else if (receiver instanceof List) {
       List<?> receiverList = (List<?>) receiver;
       for (Object obj : receiverList) {
         if (obj instanceof IProject) {
           IProject project = (IProject) obj;
-          return handleTestForProject(project, property);
+          return handleTestForNature(project, property);
         }
       }
     } else if (receiver instanceof IProject) {
       IProject project = (IProject) receiver;
-      return handleTestForProject(project, property);
+      return handleTestForNature(project, property);
     }
 
     return false;
   }
 
-  private boolean handleTestForProject(final IProject project, final String property) {
+  private boolean handleApplicableResourceTest(Object obj, String property, Object[] args, Object expectedValue) {
+    if (obj instanceof IProject && ProjectPropertyPage.PROPERTYPAGE_ID.equals(args[0])) {
+      return true;
+    }
+    return false;
+  }
+  
+  private boolean handleTestForNature(final IProject project, final String property) {
     System.out.println(property);
     try {
       if (CANADDNNEMBEDDEDNATURE_PROERTY.equals(property)) {
