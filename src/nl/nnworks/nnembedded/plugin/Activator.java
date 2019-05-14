@@ -1,4 +1,4 @@
-package nl.nnworks.nnembedded;
+package nl.nnworks.nnembedded.plugin;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;

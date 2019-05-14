@@ -1,4 +1,4 @@
-package nl.nnworks.nnembedded.project.nature;
+package nl.nnworks.nnembedded.plugin.nature;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -20,12 +20,12 @@ import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.statushandlers.StatusManager;
 
-import nl.nnworks.nnembedded.Activator;
+import nl.nnworks.nnembedded.plugin.Activator;
 
 public class NatureCommandHandler implements IHandler {
 
-  private static final String NNEMBEDDED_NATURE_ADDNATURE_COMMAND = "nl.nnworks.nnembedded.nature.addnature";
-  private static final String NNEMBEDDED_NATURE_REMOVENATURE_COMMAND = "nl.nnworks.nnembedded.nature.removenature";
+  private static final String NNEMBEDDED_NATURE_ADDNATURE_COMMAND = "nl.nnworks.nnembedded.plugin.nature.addnature";
+  private static final String NNEMBEDDED_NATURE_REMOVENATURE_COMMAND = "nl.nnworks.nnembedded.plugin.nature.removenature";
 
   @Override
   public void addHandlerListener(IHandlerListener handlerListener) {

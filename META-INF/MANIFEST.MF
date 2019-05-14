@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: NNEmbedded
 Bundle-SymbolicName: NNEmbeddedPlugin;singleton:=true
 Bundle-Version: 1.0.0
-Bundle-Activator: nl.nnworks.nnembedded.Activator
+Bundle-Activator: nl.nnworks.nnembedded.plugin.Activator
 Bundle-Vendor: Neural Networks
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

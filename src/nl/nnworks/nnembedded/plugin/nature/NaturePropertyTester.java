@@ -1,4 +1,4 @@
-package nl.nnworks.nnembedded.project.nature;
+package nl.nnworks.nnembedded.plugin.nature;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.ui.statushandlers.StatusManager;
 
-import nl.nnworks.nnembedded.Activator;
+import nl.nnworks.nnembedded.plugin.Activator;
 
 public class NaturePropertyTester extends org.eclipse.core.expressions.PropertyTester {
 

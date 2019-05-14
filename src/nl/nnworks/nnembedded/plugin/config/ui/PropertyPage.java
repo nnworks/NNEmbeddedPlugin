@@ -1,4 +1,4 @@
-package nl.nnworks.nnembedded.project.nature.configuration;
+package nl.nnworks.nnembedded.plugin.config.ui;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
