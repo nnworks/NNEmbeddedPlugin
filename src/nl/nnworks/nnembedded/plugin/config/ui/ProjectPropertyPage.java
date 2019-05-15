@@ -2,6 +2,7 @@ package nl.nnworks.nnembedded.plugin.config.ui;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -19,11 +20,13 @@ public class ProjectPropertyPage extends PropertyPage implements IWorkbenchPrope
 
   @Override
   protected Control createContents(Composite parent) {
-    Composite composite = new Composite(parent, SWT.NONE);
-    
     // TODO
+	  
+    ListViewer viewer = new ListViewer(parent);  
+    //Composite composite = new Composite(parent, SWT.NONE);
+    //composite.setLayout();
     
-    return composite;
+    return viewer;
   }
 
   public IProject getProject() {
