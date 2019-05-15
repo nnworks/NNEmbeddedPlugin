@@ -50,20 +50,24 @@ public class PluginPropertyTester extends org.eclipse.core.expressions.PropertyT
 
   private boolean handleApplicableResourceTest(Object obj, String property, Object[] args, Object expectedValue) {
     if (obj instanceof IProject && ProjectPropertyPage.PROPERTYPAGE_ID.equals(args[0])) {
+      System.out.println(property + ": true");
       return true;
     }
+    
+    System.out.println(property + ": false");
     return false;
   }
   
   private boolean handleTestForNature(final IProject project, final String property) {
-    System.out.println(property);
     try {
       if (CANADDNNEMBEDDEDNATURE_PROERTY.equals(property)) {
-        if (hasCorCppNature(project) && (project.getNature(NNEmbeddedProjectNature.NATURE_ID) == null)) {
+        if (hasCorCppNature(project) && !project.hasNature(NNEmbeddedProjectNature.NATURE_ID)) {
+          System.out.println(property + ": true");
           return true;
         }
       } else if (HASNNEMBEDDEDNATURE_PROPERTY.equals(property)) {
-        if (project.getNature(NNEmbeddedProjectNature.NATURE_ID) != null) {
+        if (project.hasNature(NNEmbeddedProjectNature.NATURE_ID)) {
+          System.out.println(property + ": true");
           return true;
         }
       }
@@ -72,6 +76,7 @@ public class PluginPropertyTester extends org.eclipse.core.expressions.PropertyT
       StatusManager.getManager().handle(status, StatusManager.LOG);
     }
 
+    System.out.println(property + ": false");
     return false;
   }
 

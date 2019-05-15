@@ -12,24 +12,24 @@
       </propertyTester>
    </extension>
    <extension 
-         id="nl.nnworks.nnembedded.plugin"
+         id="nl.nnworks.nnembedded.plugin.nature.nnembeddedprojectnature"
          name="NNWorks Embedded Nature"
          point="org.eclipse.core.resources.natures">
          
       <runtime>
-         <run class="nl.nnworks.nnembedded.plugin.NNEmbeddedProjectNature" />
+         <run class="nl.nnworks.nnembedded.plugin.nature.NNEmbeddedProjectNature" />
       </runtime>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="nl.nnworks.nnembedded.plugin.NatureCommandHandler"
-            id="nl.nnworks.nnembedded.plugin.addnature"
+            defaultHandler="nl.nnworks.nnembedded.plugin.nature.NatureCommandHandler"
+            id="nl.nnworks.nnembedded.plugin.nature.addnature"
             name="AddNature">
       </command>
       <command
-            defaultHandler="nl.nnworks.nnembedded.plugin.NatureCommandHandler"
-            id="nl.nnworks.nnembedded.plugin.removenature"
+            defaultHandler="nl.nnworks.nnembedded.plugin.nature.NatureCommandHandler"
+            id="nl.nnworks.nnembedded.plugin.nature.removenature"
             name="RemoveNature">
       </command>
    </extension>
@@ -39,7 +39,7 @@
             allPopups="true"
             locationURI="popup:org.eclipse.ui.projectConfigure">
          <command
-               commandId="nl.nnworks.nnembedded.plugin.addnature"
+               commandId="nl.nnworks.nnembedded.plugin.nature.addnature"
                label="Add NNEmbedded nature"
                style="push"
                tooltip="Add NNEmdedded nature to project">
@@ -52,7 +52,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="nl.nnworks.nnembedded.plugin.removenature"
+               commandId="nl.nnworks.nnembedded.plugin.nature.removenature"
                label="Remove NNEmbedded nature"
                style="push"
                tooltip="Remove NNEmbedded nature from project">

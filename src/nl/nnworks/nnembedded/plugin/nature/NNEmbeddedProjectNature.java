@@ -6,7 +6,7 @@ import org.eclipse.core.runtime.CoreException;
 
 public class NNEmbeddedProjectNature implements IProjectNature {
 
-  public static final String NATURE_ID = "nl.nnworks.nnembedded.plugin.nature";
+  public static final String NATURE_ID = "nl.nnworks.nnembedded.plugin.nature.nnembeddedprojectnature";
   public static final String CNATURE_ID = "org.eclipse.cdt.core.cnature";
   public static final String CCNATURE_ID = "org.eclipse.cdt.core.ccnature";
 
