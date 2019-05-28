@@ -4,31 +4,30 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
 
-public class ProjectPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
+public class PluginPropertiesPage extends PropertyPage implements IWorkbenchPropertyPage {
 
-  public static final String PROPERTYPAGE_ID = "nl.nnworks.nnembedded.plugin.projectpropertiespage";
+  public static final String PROPERTYPAGE_ID = "nl.nnworks.nnembedded.plugin.pluginpropertiespage";
 
-  public ProjectPropertyPage() {
+  public PluginPropertiesPage() {
     // TODO Auto-generated constructor stub
     
   }
 
   @Override
-  protected Control createContents(Composite parent) {
-    // TODO
-	  
-    ListViewer viewer = new ListViewer(parent);  
-    //Composite composite = new Composite(parent, SWT.NONE);
-    //composite.setLayout();
-    
-    return viewer;
+  protected Control createContents(final Composite parent) {
+    Composite composite = new PluginPropertiesComposite(parent, SWT.NONE);
+    return composite;
   }
-
+  
   public IProject getProject() {
     IProject project = null;
     IAdaptable element = getElement();

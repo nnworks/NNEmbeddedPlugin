@@ -70,13 +70,13 @@
          id="mainprojectpropertypage"
          point="org.eclipse.ui.propertyPages">
       <page
-            class="nl.nnworks.nnembedded.plugin.config.ui.ProjectPropertyPage"
-            id="nl.nnworks.nnembedded.plugin.projectpropertiespage"
+            class="nl.nnworks.nnembedded.plugin.config.ui.PluginPropertiesPage"
+            id="nl.nnworks.nnembedded.plugin.pluginpropertiespage"
             name="NNEmbedded Properties">
 		<enabledWhen>
 	       <and>
 	          <test
-	                args="nl.nnworks.nnembedded.plugin.projectpropertiespage"
+	                args="nl.nnworks.nnembedded.plugin.pluginpropertiespage"
 	                forcePluginActivation="true"
 	                property="nl.nnworks.nnembedded.plugin.isApplicablePropertyResource">
               </test>

@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.ui.statushandlers.StatusManager;
 
-import nl.nnworks.nnembedded.plugin.config.ui.ProjectPropertyPage;
+import nl.nnworks.nnembedded.plugin.config.ui.PluginPropertiesPage;
 import nl.nnworks.nnembedded.plugin.nature.NNEmbeddedProjectNature;
 
 public class PluginPropertyTester extends org.eclipse.core.expressions.PropertyTester {
@@ -49,7 +49,7 @@ public class PluginPropertyTester extends org.eclipse.core.expressions.PropertyT
   }
 
   private boolean handleApplicableResourceTest(Object obj, String property, Object[] args, Object expectedValue) {
-    if (obj instanceof IProject && ProjectPropertyPage.PROPERTYPAGE_ID.equals(args[0])) {
+    if (obj instanceof IProject && PluginPropertiesPage.PROPERTYPAGE_ID.equals(args[0])) {
       System.out.println(property + ": true");
       return true;
     }
