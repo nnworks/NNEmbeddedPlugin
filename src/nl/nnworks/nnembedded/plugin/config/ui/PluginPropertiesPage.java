@@ -2,12 +2,7 @@ package nl.nnworks.nnembedded.plugin.config.ui;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbenchPropertyPage;
@@ -18,7 +13,6 @@ public class PluginPropertiesPage extends PropertyPage implements IWorkbenchProp
   public static final String PROPERTYPAGE_ID = "nl.nnworks.nnembedded.plugin.pluginpropertiespage";
 
   public PluginPropertiesPage() {
-    // TODO Auto-generated constructor stub
     
   }
 
