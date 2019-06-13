@@ -1,5 +1,13 @@
 package nl.nnworks.nnembedded.plugin.config.ui;
 
+import java.io.File;
+
+import org.eclipse.core.commands.operations.OperationStatus;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
@@ -11,20 +19,34 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.osgi.service.prefs.BackingStoreException;
+
+import nl.nnworks.nnembedded.plugin.NNEmEmbeddedPlugin;
+import nl.nnworks.nnembedded.plugin.nature.NNEmbeddedProjectNature;
 
 public class PluginPropertiesComposite extends Composite {
   private Text projectDescrFile;
   private Composite composite;
 
+  private PluginPropertiesPage propertiesPage;
+  
+  private String prefLastBrowseDir;
+  
   /**
    * Create the composite.
    * @param parent
    * @param style
    */
-  public PluginPropertiesComposite(Composite parent, int style) {
+  public PluginPropertiesComposite(Composite parent, int style, final PluginPropertiesPage propertiesPage) {
     super(parent, style);
     composite = parent;
+    this.propertiesPage = propertiesPage;
+    
+    // retrieve the preferences
+    getCurrentPreferences();
+    
     setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
     setLayout(new GridLayout(5, false));
     
@@ -51,6 +73,8 @@ public class PluginPropertiesComposite extends Composite {
     browseProjectDescrButton.setText("...");
     new Label(this, SWT.NONE);
     browseProjectDescrButton.addListener(SWT.Selection, new BrowseEventHandler());
+    
+    getCurrentPreferences();
   }
 
   private class BrowseEventHandler implements Listener {
@@ -61,9 +85,14 @@ public class PluginPropertiesComposite extends Composite {
     @Override
     public void handleEvent(Event event) {
       FileDialog dialog = new FileDialog(composite.getShell(), SWT.OPEN);
-      dialog.setFilterExtensions(new String [] {"*.html"});
-      dialog.setFilterPath("c:\\temp");
-      dialog.open();      
+      dialog.setFilterExtensions(new String [] {"*.pdesc", "*"});
+      dialog.setFilterPath(prefLastBrowseDir);
+      String selectedPath = dialog.open();
+      
+      if (selectedPath != null) {
+        File selectedFile = new File(selectedPath);
+        saveProjectPreference("last-browse-dir", selectedFile.getParent());
+      }
     }
     
   }

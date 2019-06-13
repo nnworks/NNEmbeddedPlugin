@@ -18,7 +18,7 @@ public class PluginPropertiesPage extends PropertyPage implements IWorkbenchProp
 
   @Override
   protected Control createContents(final Composite parent) {
-    Composite composite = new PluginPropertiesComposite(parent, SWT.NONE);
+    Composite composite = new PluginPropertiesComposite(parent, SWT.NONE, this);
     return composite;
   }
   

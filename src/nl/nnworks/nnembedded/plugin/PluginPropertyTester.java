@@ -72,7 +72,7 @@ public class PluginPropertyTester extends org.eclipse.core.expressions.PropertyT
         }
       }
     } catch (CoreException e) {
-      OperationStatus status = new OperationStatus(IStatus.ERROR, Activator.PLUGIN_ID, 3, "Something went wrong while checking project natures of project " + project.getName(), e);
+      OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3, "Something went wrong while checking project natures of project " + project.getName(), e);
       StatusManager.getManager().handle(status, StatusManager.LOG);
     }
 

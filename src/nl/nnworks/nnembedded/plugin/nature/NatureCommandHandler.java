@@ -20,7 +20,7 @@ import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.statushandlers.StatusManager;
 
-import nl.nnworks.nnembedded.plugin.Activator;
+import nl.nnworks.nnembedded.plugin.NNEmEmbeddedPlugin;
 
 public class NatureCommandHandler implements IHandler {
 
@@ -93,7 +93,7 @@ public class NatureCommandHandler implements IHandler {
         return currentNatures;
       }
     } catch (CoreException e) {
-      OperationStatus status = new OperationStatus(IStatus.ERROR, Activator.PLUGIN_ID, 3, "Something went wrong while adding nature " + NNEmbeddedProjectNature.NATURE_ID + " to project " + project.getName(), e);
+      OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3, "Something went wrong while adding nature " + NNEmbeddedProjectNature.NATURE_ID + " to project " + project.getName(), e);
       StatusManager.getManager().handle(status, StatusManager.LOG);
     }
     
@@ -114,7 +114,7 @@ public class NatureCommandHandler implements IHandler {
         return currentNatures;
       }
     } catch (CoreException e) {
-      OperationStatus status = new OperationStatus(IStatus.ERROR, Activator.PLUGIN_ID, 3, "Something went wrong while removing nature " + NNEmbeddedProjectNature.NATURE_ID + " from project " + project.getName(), e);
+      OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3, "Something went wrong while removing nature " + NNEmbeddedProjectNature.NATURE_ID + " from project " + project.getName(), e);
       StatusManager.getManager().handle(status, StatusManager.LOG);
     }
     
