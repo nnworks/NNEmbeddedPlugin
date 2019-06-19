@@ -44,6 +44,12 @@ public class NNEmbeddedProjectNature implements IProjectNature {
   @Override
   public void deconfigure() throws CoreException {
     System.out.println("deconfigure nature");
+
+    System.out.println("check builder");
+    if (hasBuilder(ProjectConfigBuilder.BUILDER_ID)) {
+      System.out.println("not present: remove builder");
+      removeBuilder(ProjectConfigBuilder.BUILDER_ID);
+    }
   }
 
   @Override
@@ -60,7 +66,7 @@ public class NNEmbeddedProjectNature implements IProjectNature {
   private void addBuilder(final String builderId) {
     try {
       // add builder to project properties
-      IProjectDescription description = project.getDescription();
+      final IProjectDescription description = project.getDescription();
       final ICommand buildCommand = description.newCommand();
       buildCommand.setBuilderName(builderId);
    
@@ -72,8 +78,32 @@ public class NNEmbeddedProjectNature implements IProjectNature {
       project.setDescription(description, null);    
     } catch (CoreException e) {
       OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3,
-          "Something went wrong while adding builder " + ProjectConfigBuilder.BUILDER_ID + " to project " + getProject().getName(),
-          e);
+          "Something went wrong while adding builder " + ProjectConfigBuilder.BUILDER_ID + " to project " + getProject().getName(), e);
+      StatusManager.getManager().handle(status, StatusManager.LOG);
+    }
+  }
+  
+  private void removeBuilder(final String builderId) {
+    try {
+      // add builder to project properties
+      final IProjectDescription description = project.getDescription();
+      final ICommand buildCommand = description.newCommand();
+      buildCommand.setBuilderName(builderId);
+   
+      final List<ICommand> commands = new ArrayList<ICommand>();
+      commands.addAll(Arrays.asList(description.getBuildSpec()));
+      for (final ICommand buildSpec : description.getBuildSpec()) {
+        if (builderId.equals(buildSpec.getBuilderName())) {
+         // remove from lisy
+         commands.remove(buildSpec);
+        }
+       }
+   
+      description.setBuildSpec(commands.toArray(new ICommand[commands.size()]));
+      project.setDescription(description, null);    
+    } catch (CoreException e) {
+      OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3,
+          "Something went wrong while removing builder " + ProjectConfigBuilder.BUILDER_ID + " from project " + getProject().getName(), e);
       StatusManager.getManager().handle(status, StatusManager.LOG);
     }
   }
@@ -86,8 +116,7 @@ public class NNEmbeddedProjectNature implements IProjectNature {
       }
     } catch (final CoreException e) {
       OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3,
-          "Something went wrong while checking presence of builder " + ProjectConfigBuilder.BUILDER_ID + " on project " + getProject().getName(),
-          e);
+          "Something went wrong while checking presence of builder " + ProjectConfigBuilder.BUILDER_ID + " on project " + getProject().getName(), e);
       StatusManager.getManager().handle(status, StatusManager.LOG);
     }
 

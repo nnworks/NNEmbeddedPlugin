@@ -90,4 +90,14 @@
 		</enabledWhen>
       </page>
    </extension>
+   <extension
+         id="nl.nnworks.nnembedded.plugin.projectconfigbuilder"
+         name="NNEmbedded Project Configuration Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder>
+         <run
+               class="nl.nnworks.nnembedded.plugin.project.builder.ProjectConfigBuilder">
+         </run>
+      </builder>
+   </extension>
 </plugin>
