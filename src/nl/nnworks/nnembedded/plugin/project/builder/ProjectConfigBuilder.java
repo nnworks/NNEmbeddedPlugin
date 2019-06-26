@@ -2,6 +2,8 @@ package nl.nnworks.nnembedded.plugin.project.builder;
 
 import java.util.Map;
 
+import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
+import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -33,7 +35,11 @@ public class ProjectConfigBuilder extends IncrementalProjectBuilder {
   }
 
   protected void fullBuild(final IProgressMonitor monitor) {
+    final IProject project = getProject();
+
     System.out.println("performing full build");
+    IManagedBuildInfo buildInfo = ManagedBuildManager.getBuildInfo(project);
+    buildInfo.getConfigurationNames();
   }
 
   protected void incrementalBuild(final IProgressMonitor monitor) {
