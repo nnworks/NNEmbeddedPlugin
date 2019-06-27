@@ -2,17 +2,10 @@ package nl.nnworks.nnembedded.plugin.config.ui;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
-import org.eclipse.core.commands.operations.OperationStatus;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontData;
@@ -24,19 +17,13 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.statushandlers.StatusManager;
-import org.eclipse.wb.swt.SWTResourceManager;
-import org.osgi.service.prefs.BackingStoreException;
-
-import nl.nnworks.nnembedded.plugin.NNEmEmbeddedPlugin;
-import nl.nnworks.nnembedded.plugin.nature.NNEmbeddedProjectNature;
-import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProject;
-import nl.nnworks.nnembedded.plugin.project.ProjectPreferences;
-import org.eclipse.swt.custom.CCombo;
-import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.wb.swt.SWTResourceManager;
+
+import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProject;
+import nl.nnworks.nnembedded.plugin.utils.StringConcatCollector;
 
 public class PluginPropertiesComposite extends Composite {
   private static final String UPDATE_CONFIGURATIONS_LABEL = "Update configurations:";
@@ -46,6 +33,7 @@ public class PluginPropertiesComposite extends Composite {
   private static final String TOOLTIP_PROJECT_DESCRIPTION_FILE = "Specify the project description file";
   private static final String LABEL_PROJECT_DESCRIPTION_FILE = "Project description file:";
   private static final String[] FILTER = new String[] { "*.pdesc", "*" };
+  private static final String BUILD_CONFIGS_SEPARATOR = ",";
 
   /**
    * preference keys  
@@ -105,8 +93,8 @@ public class PluginPropertiesComposite extends Composite {
     TableViewer tableViewer = new TableViewer(this, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION | SWT.MULTI);
     Table table = tableViewer.getTable();
     table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
-    addBuildConfigTableItems(table);
-    table.addListener(SWT.Selection, new SelectBuildConfigEventHandler());
+    List<String> buildConfigs = addBuildConfigTableItems(table);
+    table.addListener(SWT.Selection, new SelectBuildConfigEventHandler(buildConfigs));
     table.computeSize(10, 10, true);
     new Label(this, SWT.NONE);
   }
@@ -120,7 +108,7 @@ public class PluginPropertiesComposite extends Composite {
   }
 
   private void setPreference(final String key, final String value) {
-    nnEmbeddedProject.getPreferences().put(LAST_BROWSE_DIR, value);
+    nnEmbeddedProject.getPreferences().put(key, value);
   }
 
   private class BrowseEventHandler implements Listener {
@@ -133,7 +121,7 @@ public class PluginPropertiesComposite extends Composite {
 
       FileDialog dialog = new FileDialog(composite.getShell(), SWT.OPEN);
       dialog.setFilterExtensions(FILTER);
-      dialog.setFilterPath(getPreference(LAST_BROWSE_DIR,System.getProperty("user.home")));
+      dialog.setFilterPath(getPreference(LAST_BROWSE_DIR, System.getProperty("user.home")));
       String selectedPath = dialog.open();
 
       if (selectedPath != null) {
@@ -145,54 +133,70 @@ public class PluginPropertiesComposite extends Composite {
 
   private class SelectBuildConfigEventHandler implements Listener {
 
-    public SelectBuildConfigEventHandler() {
+    List<String> buildConfigs;
+    
+    public SelectBuildConfigEventHandler(final List<String> buildConfigs) {
+      this.buildConfigs = buildConfigs;
     }
 
     @Override
     public void handleEvent(Event event) {
       if (event.detail == SWT.CHECK) {
         TableItem item = (TableItem)event.item;
-        System.out.println(item.getText());
+        if (item.getChecked()) {
+          if (!buildConfigs.contains(item.getText())) {
+            buildConfigs.add(item.getText());
+          }
+        } else {
+          while (buildConfigs.contains(item.getText())) {
+            buildConfigs.remove(item.getText());
+          }
+        }
+        
+        setSelectedBuildConfigurations(buildConfigs);
       }
     }
   }
-  
   
   @Override
   protected void checkSubclass() {
     // Disable the check that prevents sub-classing of SWT components
   }
 
-  private void addBuildConfigTableItems(final Table table) {
+  private List<String> addBuildConfigTableItems(final Table table) {
     
-    List<String> configs = getSelectedBuildConfigurations();
+    List<String> selectedBuildConfigs = getSelectedBuildConfigurations();
     
     for (String configName : getAllBuildConfigurations()) {
       TableItem item = new TableItem(table, SWT.NONE);
       item.setText(configName);
-      if (configs != null && configs.contains(configName)) {
+      if (selectedBuildConfigs != null && selectedBuildConfigs.contains(configName)) {
         item.setChecked(true);
-      } else if (configs == null) {
+      } else if (selectedBuildConfigs == null) {
         item.setChecked(true);
       }
     }
+    
+    return selectedBuildConfigs;
   }
   
-  private void setSelectedBuildConfigurations(final List selectedBuildConfigs) {
-    
+  private void setSelectedBuildConfigurations(final List<String> selectedBuildConfigs) {
+    String selectedBuildConfigsString = selectedBuildConfigs.stream().collect(StringConcatCollector.collect(BUILD_CONFIGS_SEPARATOR));
+    setPreference(FOR_BUILD_CONFIGS, selectedBuildConfigsString);
   }
 
   private List<String> getSelectedBuildConfigurations() {
-    String forBuildConfigs = getPreference(FOR_BUILD_CONFIGS, null);
-    List<String> configs = null;
-    if (forBuildConfigs != null) {
-      configs = Arrays.asList(forBuildConfigs.split(","));
+    String selectedBuildConfigsPref = getPreference(FOR_BUILD_CONFIGS, null);
+    List<String> configs = new ArrayList<String>();
+    if (selectedBuildConfigsPref != null) {
+      for (String buildConfig : selectedBuildConfigsPref.split(BUILD_CONFIGS_SEPARATOR)) {
+        configs.add(buildConfig);
+      }
     }
     
     return configs;
   }
-  
-  
+    
   private String[] getAllBuildConfigurations() {
     IManagedBuildInfo buildInfo = ManagedBuildManager.getBuildInfo(propertiesPage.getProject());
     return buildInfo.getConfigurationNames();
