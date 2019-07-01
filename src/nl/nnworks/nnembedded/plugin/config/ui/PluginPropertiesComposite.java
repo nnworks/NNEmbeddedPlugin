@@ -9,6 +9,10 @@ import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -41,6 +45,7 @@ public class PluginPropertiesComposite extends Composite {
    */
   private static final String LAST_BROWSE_DIR = "last-browse-dir";
   private static final String FOR_BUILD_CONFIGS = "for-build-configs";
+  private static final String FOR_PDESC_FILE = "pdesc-file";
 
   private Text projectDescrFile;
   private Composite composite;
@@ -77,9 +82,12 @@ public class PluginPropertiesComposite extends Composite {
     projectDescrFile.setFont(SWTResourceManager.getFont(defaultFontData.getName(), defaultFontData.getHeight(), SWT.ITALIC));
     projectDescrFile.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
     projectDescrFile.setToolTipText(TOOLTIP_PROJECT_DESCRIPTION_FILE);
-    projectDescrFile.setForeground(SWTResourceManager.getColor(SWT.COLOR_GRAY));
-
-    projectDescrFile.setText(DEFAULT_PROJECT_DESC_FILE);
+    projectDescrFile.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_FOREGROUND));
+    projectDescrFile.setText(getPreference(FOR_PDESC_FILE, DEFAULT_PROJECT_DESC_FILE));
+    ProjectDescTextHandler handler = new ProjectDescTextHandler();
+    projectDescrFile.addModifyListener(handler);
+    projectDescrFile.addFocusListener(handler);
+    
     Button browseProjectDescrButton = new Button(this, SWT.NONE);
     browseProjectDescrButton.setToolTipText(TOOLTIP_BROWSE_FILE);
     browseProjectDescrButton.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
@@ -100,8 +108,8 @@ public class PluginPropertiesComposite extends Composite {
   }
 
   /**
-   * 
-   * @return
+   * Get the preference referred to by key.
+   * @return preference referred to by <key>. If not the <defaultValue> is returned.
    */
   private String getPreference(final String key, final String defaultValue) {
     return nnEmbeddedProject.getPreferences().get(key, defaultValue);
@@ -112,10 +120,36 @@ public class PluginPropertiesComposite extends Composite {
   }
 
   /**
+   * Project description file text box modification listener
+   */
+  private class ProjectDescTextHandler implements ModifyListener, FocusListener {
+    @Override
+    public void modifyText(ModifyEvent event) {
+      Text projectDescFileText = (Text) event.getSource();
+        setPreference(FOR_PDESC_FILE, projectDescFileText.getText());
+    }
+
+    @Override
+    public void focusGained(FocusEvent event) {
+      Text projectDescFileText = (Text) event.getSource();
+      if (projectDescFileText.getText().equals(DEFAULT_PROJECT_DESC_FILE)) {
+        projectDescFileText.setText("");
+      }      
+    }
+
+    @Override
+    public void focusLost(FocusEvent event) {
+      Text projectDescFileText = (Text) event.getSource();
+      if (projectDescFileText.getText().length() == 0) {
+        projectDescFileText.setText(DEFAULT_PROJECT_DESC_FILE);
+      }      
+    }
+  }
+
+  /**
    * Handler for browsing for the configuration file.
    */
   private class BrowseEventHandler implements Listener {
-
     public BrowseEventHandler() {
     }
 
@@ -138,6 +172,7 @@ public class PluginPropertiesComposite extends Composite {
             
           projectDescrFile.setText(selectedPath);
           setPreference(LAST_BROWSE_DIR, selectedFile.getParent());
+          setPreference(FOR_PDESC_FILE, selectedPath);
         }
       } catch (IOException e) {
         e.printStackTrace();
