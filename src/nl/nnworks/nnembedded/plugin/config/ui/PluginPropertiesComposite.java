@@ -1,6 +1,7 @@
 package nl.nnworks.nnembedded.plugin.config.ui;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,12 +37,11 @@ public class PluginPropertiesComposite extends Composite {
   private static final String BUILD_CONFIGS_SEPARATOR = ",";
 
   /**
-   * preference keys  
+   * preference keys
    */
   private static final String LAST_BROWSE_DIR = "last-browse-dir";
   private static final String FOR_BUILD_CONFIGS = "for-build-configs";
-  
-  
+
   private Text projectDescrFile;
   private Composite composite;
 
@@ -63,7 +63,7 @@ public class PluginPropertiesComposite extends Composite {
 
     setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
     setLayout(new GridLayout(3, false));
-    
+
     Label projectDescrLabel = new Label(this, SWT.NONE);
     projectDescrLabel.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
     projectDescrLabel.setText(LABEL_PROJECT_DESCRIPTION_FILE);
@@ -85,11 +85,11 @@ public class PluginPropertiesComposite extends Composite {
     browseProjectDescrButton.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
     browseProjectDescrButton.setText(BROWSE_BUTTON_TEXT);
     browseProjectDescrButton.addListener(SWT.Selection, new BrowseEventHandler());
-    
+
     Label buildConfigsLabel = new Label(this, SWT.NONE);
     buildConfigsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
     buildConfigsLabel.setText(UPDATE_CONFIGURATIONS_LABEL);
-    
+
     TableViewer tableViewer = new TableViewer(this, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION | SWT.MULTI);
     Table table = tableViewer.getTable();
     table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
@@ -111,6 +111,9 @@ public class PluginPropertiesComposite extends Composite {
     nnEmbeddedProject.getPreferences().put(key, value);
   }
 
+  /**
+   * Handler for browsing for the configuration file.
+   */
   private class BrowseEventHandler implements Listener {
 
     public BrowseEventHandler() {
@@ -119,22 +122,40 @@ public class PluginPropertiesComposite extends Composite {
     @Override
     public void handleEvent(Event event) {
 
-      FileDialog dialog = new FileDialog(composite.getShell(), SWT.OPEN);
-      dialog.setFilterExtensions(FILTER);
-      dialog.setFilterPath(getPreference(LAST_BROWSE_DIR, System.getProperty("user.home")));
-      String selectedPath = dialog.open();
-
-      if (selectedPath != null) {
-        File selectedFile = new File(selectedPath);
-        setPreference(LAST_BROWSE_DIR, selectedFile.getParent());
+      try {
+        FileDialog dialog = new FileDialog(composite.getShell(), SWT.OPEN);
+        dialog.setFilterExtensions(FILTER);
+        dialog.setFilterPath(getPreference(LAST_BROWSE_DIR, System.getProperty("user.home")));
+        String selectedPath = dialog.open();
+  
+        if (selectedPath != null) {
+          File selectedFile = new File(selectedPath);
+          final String projectPath = propertiesPage.getProject().getLocation().addTrailingSeparator().toString();
+          final String pDescPath = selectedFile.getCanonicalPath(); 
+          if (pDescPath.startsWith(projectPath)) {
+            selectedPath = pDescPath.substring(projectPath.length());
+          }
+            
+          projectDescrFile.setText(selectedPath);
+          setPreference(LAST_BROWSE_DIR, selectedFile.getParent());
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
       }
     }
   }
 
+  /**
+   * Handler for selecting the build configurations to apply the nnembedded
+   * configuration to.
+   * 
+   * @author pg63ux
+   *
+   */
   private class SelectBuildConfigEventHandler implements Listener {
 
     List<String> buildConfigs;
-    
+
     public SelectBuildConfigEventHandler(final List<String> buildConfigs) {
       this.buildConfigs = buildConfigs;
     }
@@ -142,7 +163,7 @@ public class PluginPropertiesComposite extends Composite {
     @Override
     public void handleEvent(Event event) {
       if (event.detail == SWT.CHECK) {
-        TableItem item = (TableItem)event.item;
+        TableItem item = (TableItem) event.item;
         if (item.getChecked()) {
           if (!buildConfigs.contains(item.getText())) {
             buildConfigs.add(item.getText());
@@ -152,21 +173,21 @@ public class PluginPropertiesComposite extends Composite {
             buildConfigs.remove(item.getText());
           }
         }
-        
+
         setSelectedBuildConfigurations(buildConfigs);
       }
     }
   }
-  
+
   @Override
   protected void checkSubclass() {
     // Disable the check that prevents sub-classing of SWT components
   }
 
   private List<String> addBuildConfigTableItems(final Table table) {
-    
+
     List<String> selectedBuildConfigs = getSelectedBuildConfigurations();
-    
+
     for (String configName : getAllBuildConfigurations()) {
       TableItem item = new TableItem(table, SWT.NONE);
       item.setText(configName);
@@ -176,10 +197,10 @@ public class PluginPropertiesComposite extends Composite {
         item.setChecked(true);
       }
     }
-    
+
     return selectedBuildConfigs;
   }
-  
+
   private void setSelectedBuildConfigurations(final List<String> selectedBuildConfigs) {
     String selectedBuildConfigsString = selectedBuildConfigs.stream().collect(StringConcatCollector.collect(BUILD_CONFIGS_SEPARATOR));
     setPreference(FOR_BUILD_CONFIGS, selectedBuildConfigsString);
@@ -193,13 +214,13 @@ public class PluginPropertiesComposite extends Composite {
         configs.add(buildConfig);
       }
     }
-    
+
     return configs;
   }
-    
+
   private String[] getAllBuildConfigurations() {
     IManagedBuildInfo buildInfo = ManagedBuildManager.getBuildInfo(propertiesPage.getProject());
     return buildInfo.getConfigurationNames();
   }
-  
+
 }

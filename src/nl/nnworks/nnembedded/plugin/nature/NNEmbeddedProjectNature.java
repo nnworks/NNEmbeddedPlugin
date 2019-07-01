@@ -4,17 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.commands.operations.OperationStatus;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.ui.statushandlers.StatusManager;
 
-import nl.nnworks.nnembedded.plugin.NNEmEmbeddedPlugin;
+import nl.nnworks.nnembedded.plugin.StatusCode;
 import nl.nnworks.nnembedded.plugin.project.builder.ProjectConfigBuilder;
+import nl.nnworks.nnembedded.plugin.utils.StatusLogger;
 
 public class NNEmbeddedProjectNature implements IProjectNature {
 
@@ -77,9 +76,7 @@ public class NNEmbeddedProjectNature implements IProjectNature {
       description.setBuildSpec(commands.toArray(new ICommand[commands.size()]));
       project.setDescription(description, null);    
     } catch (CoreException e) {
-      OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3,
-          "Something went wrong while adding builder " + ProjectConfigBuilder.BUILDER_ID + " to project " + getProject().getName(), e);
-      StatusManager.getManager().handle(status, StatusManager.LOG);
+      StatusLogger.LogStatus(IStatus.ERROR, getProject(), StatusCode.ERROR_ADDBUILDER, "Something went wrong while adding builder " + ProjectConfigBuilder.BUILDER_ID, e);
     }
   }
   
@@ -94,7 +91,7 @@ public class NNEmbeddedProjectNature implements IProjectNature {
       commands.addAll(Arrays.asList(description.getBuildSpec()));
       for (final ICommand buildSpec : description.getBuildSpec()) {
         if (builderId.equals(buildSpec.getBuilderName())) {
-         // remove from lisy
+         // remove from list
          commands.remove(buildSpec);
         }
        }
@@ -102,9 +99,7 @@ public class NNEmbeddedProjectNature implements IProjectNature {
       description.setBuildSpec(commands.toArray(new ICommand[commands.size()]));
       project.setDescription(description, null);    
     } catch (CoreException e) {
-      OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3,
-          "Something went wrong while removing builder " + ProjectConfigBuilder.BUILDER_ID + " from project " + getProject().getName(), e);
-      StatusManager.getManager().handle(status, StatusManager.LOG);
+      StatusLogger.LogStatus(IStatus.ERROR, getProject(), StatusCode.ERROR_REMOVEBUILDER, "Something went wrong while removing builder " + ProjectConfigBuilder.BUILDER_ID, e);
     }
   }
   
@@ -115,9 +110,7 @@ public class NNEmbeddedProjectNature implements IProjectNature {
           return true;
       }
     } catch (final CoreException e) {
-      OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3,
-          "Something went wrong while checking presence of builder " + ProjectConfigBuilder.BUILDER_ID + " on project " + getProject().getName(), e);
-      StatusManager.getManager().handle(status, StatusManager.LOG);
+      StatusLogger.LogStatus(IStatus.ERROR, getProject(), StatusCode.ERROR_CHECKBUILDER, "Something went wrong while checking presence of builder " + ProjectConfigBuilder.BUILDER_ID, e);
     }
 
     return false;

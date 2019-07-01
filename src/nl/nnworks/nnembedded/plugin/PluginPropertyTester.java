@@ -2,14 +2,13 @@ package nl.nnworks.nnembedded.plugin;
 
 import java.util.List;
 
-import org.eclipse.core.commands.operations.OperationStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.ui.statushandlers.StatusManager;
 
 import nl.nnworks.nnembedded.plugin.config.ui.PluginPropertiesPage;
 import nl.nnworks.nnembedded.plugin.nature.NNEmbeddedProjectNature;
+import nl.nnworks.nnembedded.plugin.utils.StatusLogger;
 
 public class PluginPropertyTester extends org.eclipse.core.expressions.PropertyTester {
 
@@ -72,8 +71,7 @@ public class PluginPropertyTester extends org.eclipse.core.expressions.PropertyT
         }
       }
     } catch (CoreException e) {
-      OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3, "Something went wrong while checking project natures of project " + project.getName(), e);
-      StatusManager.getManager().handle(status, StatusManager.LOG);
+      StatusLogger.LogStatus(IStatus.ERROR, project, StatusCode.ERROR_CHECKNATURES, "Something went wrong while checking project natures of project", e);
     }
 
     System.out.println(property + ": false");

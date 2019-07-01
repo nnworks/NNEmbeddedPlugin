@@ -3,16 +3,16 @@ package nl.nnworks.nnembedded.plugin.project;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.commands.operations.OperationStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.service.prefs.BackingStoreException;
 
 import nl.nnworks.nnembedded.plugin.NNEmEmbeddedPlugin;
+import nl.nnworks.nnembedded.plugin.StatusCode;
+import nl.nnworks.nnembedded.plugin.utils.StatusLogger;
 
 public class ProjectPreferences {
 
@@ -75,8 +75,7 @@ public class ProjectPreferences {
     try {
       preferences.flush();
     } catch (BackingStoreException e) {
-      OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3, "Something went wrong while saving preferences to project " + project.getName(), e);
-      StatusManager.getManager().handle(status, StatusManager.LOG);
+      StatusLogger.LogStatus(IStatus.ERROR, project, StatusCode.ERROR_SAVINGPROPERTIES, "Something went wrong while saving preferences to project", e);
     }
   }
   

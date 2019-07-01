@@ -8,7 +8,6 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
-import org.eclipse.core.commands.operations.OperationStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
@@ -18,9 +17,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.eclipse.ui.statushandlers.StatusManager;
 
-import nl.nnworks.nnembedded.plugin.NNEmEmbeddedPlugin;
+import nl.nnworks.nnembedded.plugin.StatusCode;
+import nl.nnworks.nnembedded.plugin.utils.StatusLogger;
 
 public class NatureCommandHandler implements IHandler {
 
@@ -93,8 +92,7 @@ public class NatureCommandHandler implements IHandler {
         return currentNatures;
       }
     } catch (CoreException e) {
-      OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3, "Something went wrong while adding nature " + NNEmbeddedProjectNature.NATURE_ID + " to project " + project.getName(), e);
-      StatusManager.getManager().handle(status, StatusManager.LOG);
+      StatusLogger.LogStatus(IStatus.ERROR, project, StatusCode.ERROR_ADDNATURE, "Something went wrong while adding nature \" + NNEmbeddedProjectNature.NATURE_ID", e);
     }
     
     return null;
@@ -114,8 +112,7 @@ public class NatureCommandHandler implements IHandler {
         return currentNatures;
       }
     } catch (CoreException e) {
-      OperationStatus status = new OperationStatus(IStatus.ERROR, NNEmEmbeddedPlugin.PLUGIN_ID, 3, "Something went wrong while removing nature " + NNEmbeddedProjectNature.NATURE_ID + " from project " + project.getName(), e);
-      StatusManager.getManager().handle(status, StatusManager.LOG);
+      StatusLogger.LogStatus(IStatus.ERROR, project, StatusCode.ERROR_REMOVENATURE, "Something went wrong while removing nature " + NNEmbeddedProjectNature.NATURE_ID, e);
     }
     
     return null;
@@ -132,7 +129,7 @@ public class NatureCommandHandler implements IHandler {
       project.setDescription(description, null);
       return true;
     } else {
-      StatusManager.getManager().handle(status, StatusManager.LOG);
+      StatusLogger.LogStatus(status.getSeverity(), project, StatusCode.ERROR_CHECKNATURES, "Check on natures is not OK ");
       return false;
     }
   }
