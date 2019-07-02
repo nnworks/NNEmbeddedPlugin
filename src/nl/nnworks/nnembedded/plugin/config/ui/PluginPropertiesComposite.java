@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProject;
+import nl.nnworks.nnembedded.plugin.project.ProjectPreferences;
 import nl.nnworks.nnembedded.plugin.utils.StringConcatCollector;
 
 public class PluginPropertiesComposite extends Composite {
@@ -40,24 +41,17 @@ public class PluginPropertiesComposite extends Composite {
   private static final String[] FILTER = new String[] { "*.pdesc", "*" };
   private static final String BUILD_CONFIGS_SEPARATOR = ",";
 
-  /**
-   * preference keys
-   */
-  private static final String LAST_BROWSE_DIR = "last-browse-dir";
-  private static final String FOR_BUILD_CONFIGS = "for-build-configs";
-  private static final String FOR_PDESC_FILE = "pdesc-file";
-
-  private Text projectDescrFile;
+  private Text projectDescFile;
   private Composite composite;
 
   final private PluginPropertiesPage propertiesPage;
   final private NNEmbeddedProject nnEmbeddedProject;
 
   /**
-   * Create the composite.
+   * Create the plugin properties composite.
    * 
-   * @param parent
-   * @param style
+   * @param parent parent composite of this component
+   * @param style composite style
    */
   public PluginPropertiesComposite(final Composite parent, final int style, final PluginPropertiesPage propertiesPage) {
     super(parent, style);
@@ -69,30 +63,30 @@ public class PluginPropertiesComposite extends Composite {
     setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
     setLayout(new GridLayout(3, false));
 
-    Label projectDescrLabel = new Label(this, SWT.NONE);
-    projectDescrLabel.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
-    projectDescrLabel.setText(LABEL_PROJECT_DESCRIPTION_FILE);
+    Label projectDescLabel = new Label(this, SWT.NONE);
+    projectDescLabel.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
+    projectDescLabel.setText(LABEL_PROJECT_DESCRIPTION_FILE);
 
     FontData defaultFontData = parent.getFont().getFontData()[0];
 
-    projectDescrFile = new Text(this, SWT.BORDER);
+    projectDescFile = new Text(this, SWT.BORDER);
     GridData gd_projectDescrFile = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
     gd_projectDescrFile.widthHint = 250;
-    projectDescrFile.setLayoutData(gd_projectDescrFile);
-    projectDescrFile.setFont(SWTResourceManager.getFont(defaultFontData.getName(), defaultFontData.getHeight(), SWT.ITALIC));
-    projectDescrFile.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
-    projectDescrFile.setToolTipText(TOOLTIP_PROJECT_DESCRIPTION_FILE);
-    projectDescrFile.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_FOREGROUND));
-    projectDescrFile.setText(getPreference(FOR_PDESC_FILE, DEFAULT_PROJECT_DESC_FILE));
+    projectDescFile.setLayoutData(gd_projectDescrFile);
+    projectDescFile.setFont(SWTResourceManager.getFont(defaultFontData.getName(), defaultFontData.getHeight(), SWT.ITALIC));
+    projectDescFile.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
+    projectDescFile.setToolTipText(TOOLTIP_PROJECT_DESCRIPTION_FILE);
+    projectDescFile.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_FOREGROUND));
+    projectDescFile.setText(getPreference(ProjectPreferences.FOR_PDESC_FILE, DEFAULT_PROJECT_DESC_FILE));
     ProjectDescTextHandler handler = new ProjectDescTextHandler();
-    projectDescrFile.addModifyListener(handler);
-    projectDescrFile.addFocusListener(handler);
+    projectDescFile.addModifyListener(handler);
+    projectDescFile.addFocusListener(handler);
     
-    Button browseProjectDescrButton = new Button(this, SWT.NONE);
-    browseProjectDescrButton.setToolTipText(TOOLTIP_BROWSE_FILE);
-    browseProjectDescrButton.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
-    browseProjectDescrButton.setText(BROWSE_BUTTON_TEXT);
-    browseProjectDescrButton.addListener(SWT.Selection, new BrowseEventHandler());
+    Button browseProjectDescButton = new Button(this, SWT.NONE);
+    browseProjectDescButton.setToolTipText(TOOLTIP_BROWSE_FILE);
+    browseProjectDescButton.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
+    browseProjectDescButton.setText(BROWSE_BUTTON_TEXT);
+    browseProjectDescButton.addListener(SWT.Selection, new BrowseEventHandler());
 
     Label buildConfigsLabel = new Label(this, SWT.NONE);
     buildConfigsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
@@ -109,26 +103,37 @@ public class PluginPropertiesComposite extends Composite {
 
   /**
    * Get the preference referred to by key.
-   * @return preference referred to by <key>. If not the <defaultValue> is returned.
+   * @param key Reference to the preference.
+   * @param defaultValue When the key is not found, the defaultValue is returned.
+   * @return preference referred to by key. If not the defaultValue is returned.
    */
   private String getPreference(final String key, final String defaultValue) {
     return nnEmbeddedProject.getPreferences().get(key, defaultValue);
   }
 
+  /**
+   * Set the preference value on key. The values are not automatically persisted. Therefore a call to ProjectPreferences.saveProjectPreferences() 
+   * should be performed. Normally this should be handled by the apply/close buttons of the properties page.
+   * @param key Key of the preference value.
+   * @param value The value.
+   */
   private void setPreference(final String key, final String value) {
     nnEmbeddedProject.getPreferences().put(key, value);
   }
 
   /**
-   * Project description file text box modification listener
+   * Project description file text box modification listener.
    */
   private class ProjectDescTextHandler implements ModifyListener, FocusListener {
     @Override
     public void modifyText(ModifyEvent event) {
       Text projectDescFileText = (Text) event.getSource();
-        setPreference(FOR_PDESC_FILE, projectDescFileText.getText());
+        setPreference(ProjectPreferences.FOR_PDESC_FILE, projectDescFileText.getText());
     }
 
+    /**
+     * if the default text is set, remove it when the focus is gained.
+     */
     @Override
     public void focusGained(FocusEvent event) {
       Text projectDescFileText = (Text) event.getSource();
@@ -137,6 +142,9 @@ public class PluginPropertiesComposite extends Composite {
       }      
     }
 
+    /**
+     * If the text field is empty, set the default text again.
+     */
     @Override
     public void focusLost(FocusEvent event) {
       Text projectDescFileText = (Text) event.getSource();
@@ -159,7 +167,7 @@ public class PluginPropertiesComposite extends Composite {
       try {
         FileDialog dialog = new FileDialog(composite.getShell(), SWT.OPEN);
         dialog.setFilterExtensions(FILTER);
-        dialog.setFilterPath(getPreference(LAST_BROWSE_DIR, System.getProperty("user.home")));
+        dialog.setFilterPath(getPreference(ProjectPreferences.LAST_BROWSE_DIR, System.getProperty("user.home")));
         String selectedPath = dialog.open();
   
         if (selectedPath != null) {
@@ -170,9 +178,9 @@ public class PluginPropertiesComposite extends Composite {
             selectedPath = pDescPath.substring(projectPath.length());
           }
             
-          projectDescrFile.setText(selectedPath);
-          setPreference(LAST_BROWSE_DIR, selectedFile.getParent());
-          setPreference(FOR_PDESC_FILE, selectedPath);
+          projectDescFile.setText(selectedPath);
+          setPreference(ProjectPreferences.LAST_BROWSE_DIR, selectedFile.getParent());
+          setPreference(ProjectPreferences.FOR_PDESC_FILE, selectedPath);
         }
       } catch (IOException e) {
         e.printStackTrace();
@@ -183,9 +191,6 @@ public class PluginPropertiesComposite extends Composite {
   /**
    * Handler for selecting the build configurations to apply the nnembedded
    * configuration to.
-   * 
-   * @author pg63ux
-   *
    */
   private class SelectBuildConfigEventHandler implements Listener {
 
@@ -219,6 +224,11 @@ public class PluginPropertiesComposite extends Composite {
     // Disable the check that prevents sub-classing of SWT components
   }
 
+  /**
+   * Add the build configurations present on the project to the given table as check box items.
+   * @param table Table to add the check box items to.
+   * @return
+   */
   private List<String> addBuildConfigTableItems(final Table table) {
 
     List<String> selectedBuildConfigs = getSelectedBuildConfigurations();
@@ -236,13 +246,21 @@ public class PluginPropertiesComposite extends Composite {
     return selectedBuildConfigs;
   }
 
+  /**
+   * Update the settings in the preference set.
+   * @param selectedBuildConfigs List of build configuration names to set as checked.
+   */
   private void setSelectedBuildConfigurations(final List<String> selectedBuildConfigs) {
     String selectedBuildConfigsString = selectedBuildConfigs.stream().collect(StringConcatCollector.collect(BUILD_CONFIGS_SEPARATOR));
-    setPreference(FOR_BUILD_CONFIGS, selectedBuildConfigsString);
+    setPreference(ProjectPreferences.FOR_BUILD_CONFIGS, selectedBuildConfigsString);
   }
 
+  /**
+   * Get selected build configurations from preferences
+   * @return List with selected build configuration names.
+   */
   private List<String> getSelectedBuildConfigurations() {
-    String selectedBuildConfigsPref = getPreference(FOR_BUILD_CONFIGS, null);
+    String selectedBuildConfigsPref = getPreference(ProjectPreferences.FOR_BUILD_CONFIGS, null);
     List<String> configs = new ArrayList<String>();
     if (selectedBuildConfigsPref != null) {
       for (String buildConfig : selectedBuildConfigsPref.split(BUILD_CONFIGS_SEPARATOR)) {
@@ -253,6 +271,10 @@ public class PluginPropertiesComposite extends Composite {
     return configs;
   }
 
+  /**
+   * Get all build configurations on the current project
+   * @return String array with build configurations.
+   */
   private String[] getAllBuildConfigurations() {
     IManagedBuildInfo buildInfo = ManagedBuildManager.getBuildInfo(propertiesPage.getProject());
     return buildInfo.getConfigurationNames();

@@ -19,6 +19,14 @@ public class ProjectPreferences {
   private IProject project;
   private HashMap<String, Preference> map = new HashMap<>();
 
+  /**
+   * preference keys
+   */
+  public static final String LAST_BROWSE_DIR   = "last-browse-dir";
+  public static final String FOR_PDESC_FILE    = "pdesc-file";
+  public static final String FOR_BUILD_CONFIGS = "for-build-configs";
+  public static final String LAST_PROJECTCONFIGUPDATE_TS = "last-config-update-timestamp";
+
   public ProjectPreferences(IProject project) {
     this.project = project;
   }

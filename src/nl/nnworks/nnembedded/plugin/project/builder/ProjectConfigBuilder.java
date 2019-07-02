@@ -10,6 +10,10 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProject;
+import nl.nnworks.nnembedded.plugin.project.ProjectPreferences;
+import nl.nnworks.nnembedded.plugin.utils.DateTime;
+
 public class ProjectConfigBuilder extends IncrementalProjectBuilder {
 
   public static final String BUILDER_ID = "nl.nnworks.nnembedded.plugin.projectconfigbuilder";
@@ -40,6 +44,8 @@ public class ProjectConfigBuilder extends IncrementalProjectBuilder {
     System.out.println("performing full build");
     IManagedBuildInfo buildInfo = ManagedBuildManager.getBuildInfo(project);
     buildInfo.getConfigurationNames();
+    
+    configureCDTProject();
   }
 
   protected void incrementalBuild(final IProgressMonitor monitor) {
@@ -50,6 +56,9 @@ public class ProjectConfigBuilder extends IncrementalProjectBuilder {
     } else {
       // do an incremental build
       System.out.println("performing incremental build");
+      // check whether the project descriptions has changed since the last build.
+      // if...
+      configureCDTProject();
     }
   }
 
@@ -61,4 +70,8 @@ public class ProjectConfigBuilder extends IncrementalProjectBuilder {
     // add builder clean logic here
   }
 
+  protected void configureCDTProject() {
+    NNEmbeddedProject project = NNEmbeddedProject.getNNEmbeddedProject(getProject());
+    project.getPreferences().put(ProjectPreferences.LAST_PROJECTCONFIGUPDATE_TS, DateTime.getCurrentUTCTime()); 
+  }
 }
