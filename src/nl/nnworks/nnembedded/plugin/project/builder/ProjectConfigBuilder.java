@@ -71,7 +71,12 @@ public class ProjectConfigBuilder extends IncrementalProjectBuilder {
   }
 
   protected void configureCDTProject() {
+    updateLastProjectConfigUpdateTimeStamp();
+  }
+  
+  protected void updateLastProjectConfigUpdateTimeStamp() {
     NNEmbeddedProject project = NNEmbeddedProject.getNNEmbeddedProject(getProject());
-    project.getPreferences().put(ProjectPreferences.LAST_PROJECTCONFIGUPDATE_TS, DateTime.getCurrentUTCTime()); 
+    project.getPreferences().put(ProjectPreferences.LAST_PROJECTCONFIGUPDATE_TS, DateTime.getCurrentUTCTime());
+    project.getPreferences().saveProjectPreferences();
   }
 }
