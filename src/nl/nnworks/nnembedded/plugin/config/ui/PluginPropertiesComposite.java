@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProject;
-import nl.nnworks.nnembedded.plugin.project.ProjectPreferences;
+import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProjectPreferences;
 import nl.nnworks.nnembedded.plugin.utils.StringConcatCollector;
 
 public class PluginPropertiesComposite extends Composite {
@@ -46,9 +46,10 @@ public class PluginPropertiesComposite extends Composite {
 
   final private PluginPropertiesPage propertiesPage;
   final private NNEmbeddedProject nnEmbeddedProject;
+  final private NNEmbeddedProjectPreferences projectPreferences;
 
   /**
-   * Create the plugin properties composite.
+   * Create the plug-in properties composite.
    * 
    * @param parent parent composite of this component
    * @param style composite style
@@ -59,6 +60,7 @@ public class PluginPropertiesComposite extends Composite {
     this.propertiesPage = propertiesPage;
 
     nnEmbeddedProject = NNEmbeddedProject.getNNEmbeddedProject(propertiesPage.getProject());
+    projectPreferences = nnEmbeddedProject.getPreferences();
 
     setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
     setLayout(new GridLayout(3, false));
@@ -77,7 +79,7 @@ public class PluginPropertiesComposite extends Composite {
     projectDescFile.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
     projectDescFile.setToolTipText(TOOLTIP_PROJECT_DESCRIPTION_FILE);
     projectDescFile.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_FOREGROUND));
-    projectDescFile.setText(getPreference(ProjectPreferences.FOR_PDESC_FILE, DEFAULT_PROJECT_DESC_FILE));
+    projectDescFile.setText(getPreference(NNEmbeddedProjectPreferences.FOR_PDESC_FILE, DEFAULT_PROJECT_DESC_FILE));
     ProjectDescTextHandler handler = new ProjectDescTextHandler();
     projectDescFile.addModifyListener(handler);
     projectDescFile.addFocusListener(handler);
@@ -108,7 +110,7 @@ public class PluginPropertiesComposite extends Composite {
    * @return preference referred to by key. If not the defaultValue is returned.
    */
   private String getPreference(final String key, final String defaultValue) {
-    return nnEmbeddedProject.getPreferences().get(key, defaultValue);
+    return projectPreferences.get(key, defaultValue);
   }
 
   /**
@@ -118,9 +120,17 @@ public class PluginPropertiesComposite extends Composite {
    * @param value The value.
    */
   private void setPreference(final String key, final String value) {
-    nnEmbeddedProject.getPreferences().put(key, value);
+    projectPreferences.put(key, value);
   }
 
+  /**
+   * Remove the given preference
+   * @param key the reference key to remove
+   */
+  private void removePreference(final String key) {
+    projectPreferences.remove(key);
+  }
+  
   /**
    * Project description file text box modification listener.
    */
@@ -128,7 +138,12 @@ public class PluginPropertiesComposite extends Composite {
     @Override
     public void modifyText(ModifyEvent event) {
       Text projectDescFileText = (Text) event.getSource();
-        setPreference(ProjectPreferences.FOR_PDESC_FILE, projectDescFileText.getText());
+      // if the default text is shown, do not store anything
+      if (DEFAULT_PROJECT_DESC_FILE.equals(projectDescFileText.getText()) || projectDescFileText.getText().isBlank()) {
+        removePreference(NNEmbeddedProjectPreferences.FOR_PDESC_FILE);
+      } else {
+        setPreference(NNEmbeddedProjectPreferences.FOR_PDESC_FILE, projectDescFileText.getText());
+      }
     }
 
     /**
@@ -167,7 +182,7 @@ public class PluginPropertiesComposite extends Composite {
       try {
         FileDialog dialog = new FileDialog(composite.getShell(), SWT.OPEN);
         dialog.setFilterExtensions(FILTER);
-        dialog.setFilterPath(getPreference(ProjectPreferences.LAST_BROWSE_DIR, System.getProperty("user.home")));
+        dialog.setFilterPath(getPreference(NNEmbeddedProjectPreferences.LAST_BROWSE_DIR, System.getProperty("user.home")));
         String selectedPath = dialog.open();
   
         if (selectedPath != null) {
@@ -179,8 +194,8 @@ public class PluginPropertiesComposite extends Composite {
           }
             
           projectDescFile.setText(selectedPath);
-          setPreference(ProjectPreferences.LAST_BROWSE_DIR, selectedFile.getParent());
-          setPreference(ProjectPreferences.FOR_PDESC_FILE, selectedPath);
+          setPreference(NNEmbeddedProjectPreferences.LAST_BROWSE_DIR, selectedFile.getParent());
+          setPreference(NNEmbeddedProjectPreferences.FOR_PDESC_FILE, selectedPath);
         }
       } catch (IOException e) {
         e.printStackTrace();
@@ -252,7 +267,7 @@ public class PluginPropertiesComposite extends Composite {
    */
   private void setSelectedBuildConfigurations(final List<String> selectedBuildConfigs) {
     String selectedBuildConfigsString = selectedBuildConfigs.stream().collect(StringConcatCollector.collect(BUILD_CONFIGS_SEPARATOR));
-    setPreference(ProjectPreferences.FOR_BUILD_CONFIGS, selectedBuildConfigsString);
+    setPreference(NNEmbeddedProjectPreferences.FOR_BUILD_CONFIGS, selectedBuildConfigsString);
   }
 
   /**
@@ -260,7 +275,7 @@ public class PluginPropertiesComposite extends Composite {
    * @return List with selected build configuration names.
    */
   private List<String> getSelectedBuildConfigurations() {
-    String selectedBuildConfigsPref = getPreference(ProjectPreferences.FOR_BUILD_CONFIGS, null);
+    String selectedBuildConfigsPref = getPreference(NNEmbeddedProjectPreferences.FOR_BUILD_CONFIGS, null);
     List<String> configs = new ArrayList<String>();
     if (selectedBuildConfigsPref != null) {
       for (String buildConfig : selectedBuildConfigsPref.split(BUILD_CONFIGS_SEPARATOR)) {

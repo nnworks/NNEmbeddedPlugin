@@ -25,7 +25,6 @@ public class StatusLogger {
   }
   
   public static void LogStatus(final OperationStatus status) {
-    StatusManager.getManager().handle(status, StatusManager.LOG);    
+    StatusManager.getManager().handle(status, StatusManager.LOG);
   }
-  
 }

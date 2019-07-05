@@ -1,5 +1,7 @@
 package nl.nnworks.nnembedded.plugin.project.builder;
 
+import java.io.File;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
@@ -11,19 +13,27 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProject;
-import nl.nnworks.nnembedded.plugin.project.ProjectPreferences;
+import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProjectPreferences;
 import nl.nnworks.nnembedded.plugin.utils.DateTime;
 
 public class ProjectConfigBuilder extends IncrementalProjectBuilder {
 
   public static final String BUILDER_ID = "nl.nnworks.nnembedded.plugin.projectconfigbuilder";
+  private NNEmbeddedProject nnEmbeddedProject;
+  private NNEmbeddedProjectPreferences projectPreferences;
+
+  public ProjectConfigBuilder() {
+    super();
+  }
 
   @Override
   protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor) throws CoreException {
     IProject project = getProject();
+    nnEmbeddedProject = NNEmbeddedProject.getNNEmbeddedProject(getProject());
+    projectPreferences = nnEmbeddedProject.getPreferences();
 
     System.out.println("ProjectConfigBuilder build triggered for " + project.getName());
-    
+
     switch (kind) {
       case FULL_BUILD:
         fullBuild(monitor);
@@ -40,25 +50,31 @@ public class ProjectConfigBuilder extends IncrementalProjectBuilder {
 
   protected void fullBuild(final IProgressMonitor monitor) {
     final IProject project = getProject();
+    final IManagedBuildInfo buildInfo = ManagedBuildManager.getBuildInfo(project);
 
     System.out.println("performing full build");
-    IManagedBuildInfo buildInfo = ManagedBuildManager.getBuildInfo(project);
     buildInfo.getConfigurationNames();
-    
-    configureCDTProject();
+
+    if (reconfigureOfProjectNeeded(null, buildInfo)) {
+      configureCDTProject(buildInfo);
+    }
   }
 
   protected void incrementalBuild(final IProgressMonitor monitor) {
     final IProject project = getProject();
+    final IManagedBuildInfo buildInfo = ManagedBuildManager.getBuildInfo(project);
+
     IResourceDelta delta = getDelta(project);
     if (delta == null) {
       fullBuild(monitor);
     } else {
       // do an incremental build
       System.out.println("performing incremental build");
-      // check whether the project descriptions has changed since the last build.
-      // if...
-      configureCDTProject();
+      // check whether the project needs to be reconfigured due to changed project
+      // description file or project file is newer than last updated time stamp.
+      if (reconfigureOfProjectNeeded(delta, buildInfo)) {
+        configureCDTProject(buildInfo);
+      }
     }
   }
 
@@ -70,13 +86,44 @@ public class ProjectConfigBuilder extends IncrementalProjectBuilder {
     // add builder clean logic here
   }
 
-  protected void configureCDTProject() {
-    updateLastProjectConfigUpdateTimeStamp();
+  protected void configureCDTProject(final IManagedBuildInfo buildInfo) {
+    updateLastProjectConfigUpdateTimeStamp(buildInfo);
   }
-  
-  protected void updateLastProjectConfigUpdateTimeStamp() {
-    NNEmbeddedProject project = NNEmbeddedProject.getNNEmbeddedProject(getProject());
-    project.getPreferences().put(ProjectPreferences.LAST_PROJECTCONFIGUPDATE_TS, DateTime.getCurrentUTCTime());
-    project.getPreferences().saveProjectPreferences();
+
+  /**
+   * Update the time stamp in the project preferences of the last project
+   * configuration build to the current UTC time.
+   */
+  protected void updateLastProjectConfigUpdateTimeStamp(final IManagedBuildInfo buildInfo) {
+    projectPreferences.put(String.format("%s-%s", NNEmbeddedProjectPreferences.LAST_PROJECTCONFIGUPDATE_TS, buildInfo.getConfigurationName()), DateTime.getCurrentUTCTimeInRFC1123());
+    projectPreferences.saveProjectPreferences();
   }
-}
+
+  /**
+   * Check whether the current time stamp is newer that 
+   * @return
+   */
+  protected boolean reconfigureOfProjectNeeded(final IResourceDelta delta, final IManagedBuildInfo buildInfo) {
+    final String lastBuildTimeStamp = projectPreferences.get(String.format("%s-%s", NNEmbeddedProjectPreferences.LAST_PROJECTCONFIGUPDATE_TS, buildInfo.getConfigurationName()));
+    if (lastBuildTimeStamp == null) {
+      return true;
+    }
+
+    final String pDescFilename = projectPreferences.get(NNEmbeddedProjectPreferences.FOR_PDESC_FILE, NNEmbeddedProjectPreferences.DEFAULT_PDESC_FILE);
+    File pDescFile = nnEmbeddedProject.getFile(pDescFilename);
+
+    if (pDescFile != null) {
+      ZonedDateTime zdtModified = DateTime.convertLocalTimeStampToUTC(pDescFile.lastModified());
+      ZonedDateTime zdtLastBuild = DateTime.getCurrentUTCTimeFromRFC1123(lastBuildTimeStamp);
+      if (zdtModified.isAfter(zdtLastBuild)) {
+        return true;
+      }
+
+      // check for other files that can make a configuration update needed
+      // check delta.getAffectedChildren()[0].getResource().getLocationURI()
+
+    }
+    
+
+    return true;
+}}

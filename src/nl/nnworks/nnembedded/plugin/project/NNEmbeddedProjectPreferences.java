@@ -14,7 +14,7 @@ import nl.nnworks.nnembedded.plugin.NNEmEmbeddedPlugin;
 import nl.nnworks.nnembedded.plugin.StatusCode;
 import nl.nnworks.nnembedded.plugin.utils.StatusLogger;
 
-public class ProjectPreferences {
+public class NNEmbeddedProjectPreferences {
 
   private IProject project;
   private HashMap<String, Preference> map = new HashMap<>();
@@ -26,32 +26,54 @@ public class ProjectPreferences {
   public static final String FOR_PDESC_FILE    = "pdesc-file";
   public static final String FOR_BUILD_CONFIGS = "for-build-configs";
   public static final String LAST_PROJECTCONFIGUPDATE_TS = "last-config-update-timestamp";
+  public static final String DEFAULT_PDESC_FILE = "nnembedded.pdesc";
 
-  public ProjectPreferences(IProject project) {
+  public NNEmbeddedProjectPreferences(IProject project) {
     this.project = project;
   }
 
+  /**
+   * Get the preference referred to by key. When the key is not found, defaultValue is returned.
+   * 
+   * @param key
+   * @return Value referred to by key or null if the key is not found.
+   */
   public String get(Object key) {
-    return get(key.toString(), "");
+    return get(key.toString(), null);
   }
 
   /**
-   * Get the preference referred to by <key>
+   * Get the preference referred to by key. When the key is not found, defaultValue is returned.
    * 
    * @param key
-   * @param defaultValue In case no value is found, this value will be returned
-   * @return value referred to by <key> or the default value if no value is found.
+   * @param defaultValue In case no key/value is found, this value will be returned.
+   * @return Value referred to by key or the default value if the key is not found.
    */
   public String get(String key, String defaultValue) {
     if (!map.containsKey(key)) {
-      map.put(key, new Preference(getPreference(key.toString(), defaultValue), false));
-    }
+      // read through to prefs file
+      String readThroughValue = getPreferenceFromPrefsFile(key, null);
 
-    return map.get(key).value;
+      // if a value is present, cache it in the local map
+      if (readThroughValue != null) {
+        map.put(key, new Preference(readThroughValue, false));
+        return readThroughValue;
+      } else {
+        return defaultValue;
+      }
+    } else {
+      Preference preference = map.get(key);
+      if (preference != null &&preference.value != null) { 
+        return map.get(key).value;
+      } else {
+        // value is null, or not present
+        return defaultValue;
+      }
+    }
   }
 
   /**
-   * Stores the value under <key>. This value is not persisted until <saveProjectPreferences> is called.
+   * Stores the value under key. This value is not persisted until saveProjectPreferences is called.
    * @param key key of the value
    * @param value 
    * @return the previous value, or null
@@ -65,6 +87,10 @@ public class ProjectPreferences {
     
     return previousValue;
   }
+
+  public void remove(final String key) {
+    put(key, null);
+  }
   
   /**
    * Saves all changed values to the project preferences for this plug-in
@@ -73,10 +99,14 @@ public class ProjectPreferences {
     IScopeContext projectScope = new ProjectScope(project);
     IEclipsePreferences preferences = projectScope.getNode(NNEmEmbeddedPlugin.PLUGIN_ID);
 
-    for (Map.Entry<String, ProjectPreferences.Preference> entry : map.entrySet()) {
+    for (Map.Entry<String, NNEmbeddedProjectPreferences.Preference> entry : map.entrySet()) {
       Preference preference = entry.getValue();
       if (preference != null && preference.dirty) {
-        preferences.put(entry.getKey(), preference.value);
+        if (preference.value == null) {
+          preferences.remove(entry.getKey());
+        } else {
+          preferences.put(entry.getKey(), preference.value);
+        }
       }
     }
 
@@ -91,7 +121,7 @@ public class ProjectPreferences {
    * Removes all dirty preferences, so they will be read again from the plug-in project file.
    */
   public void restoreProjectPreferences() {
-    for (Map.Entry<String, ProjectPreferences.Preference> entry : map.entrySet()) {
+    for (Map.Entry<String, NNEmbeddedProjectPreferences.Preference> entry : map.entrySet()) {
       Preference preference = entry.getValue();
       if (preference != null && preference.dirty) {
         map.remove(entry.getKey());
@@ -99,7 +129,7 @@ public class ProjectPreferences {
     }
   }
 
-  private String getPreference(String key, String defaultValue) {
+  private String getPreferenceFromPrefsFile(String key, String defaultValue) {
     IScopeContext projectScope = new ProjectScope(project);
 
     IEclipsePreferences preferences = projectScope.getNode(NNEmEmbeddedPlugin.PLUGIN_ID);

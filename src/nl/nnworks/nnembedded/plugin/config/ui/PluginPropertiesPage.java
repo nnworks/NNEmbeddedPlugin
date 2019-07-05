@@ -13,6 +13,8 @@ import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProject;
 public class PluginPropertiesPage extends PropertyPage implements IWorkbenchPropertyPage {
 
   public static final String PROPERTYPAGE_ID = "nl.nnworks.nnembedded.plugin.pluginpropertiespage";
+  
+  private PluginPropertiesComposite composite;
 
   public PluginPropertiesPage() {
 
@@ -20,7 +22,7 @@ public class PluginPropertiesPage extends PropertyPage implements IWorkbenchProp
 
   @Override
   protected Control createContents(final Composite parent) {
-    Composite composite = new PluginPropertiesComposite(parent, SWT.NONE, this);
+    composite = new PluginPropertiesComposite(parent, SWT.NONE, this);
     return composite;
   }
 
