@@ -1,8 +1,13 @@
 package nl.nnworks.nnembedded.plugin.project.builder;
 
 import java.io.File;
+import java.net.URI;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
@@ -11,6 +16,8 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import com.sun.tools.javac.util.ArrayUtils;
 
 import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProject;
 import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProjectPreferences;
@@ -120,10 +127,21 @@ public class ProjectConfigBuilder extends IncrementalProjectBuilder {
       }
 
       // check for other files that can make a configuration update needed
-      // check delta.getAffectedChildren()[0].getResource().getLocationURI()
 
     }
-    
 
-    return true;
-}}
+    return false;
+  }
+  
+  private String[] findCriticalResourcesChanged(final IResourceDelta delta) {
+    Stream<IResourceDelta> stream = Stream.of(delta.getAffectedChildren());
+    
+    List<URI> uris = stream.map((d) -> { return d.getResource().getLocationURI(); }).collect(Collectors.toList());
+        
+    for (IResourceDelta rd: delta.getAffectedChildren()) {
+      if (true);
+    }
+  }
+  
+  private Func 
+}
