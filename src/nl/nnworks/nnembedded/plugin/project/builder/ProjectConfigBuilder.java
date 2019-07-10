@@ -1,11 +1,10 @@
 package nl.nnworks.nnembedded.plugin.project.builder;
 
 import java.io.File;
-import java.net.URI;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,8 +15,6 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import com.sun.tools.javac.util.ArrayUtils;
 
 import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProject;
 import nl.nnworks.nnembedded.plugin.project.NNEmbeddedProjectPreferences;
@@ -127,6 +124,7 @@ public class ProjectConfigBuilder extends IncrementalProjectBuilder {
       }
 
       // check for other files that can make a configuration update needed
+      findCriticalResourcesChanged(delta);
 
     }
 
@@ -134,14 +132,35 @@ public class ProjectConfigBuilder extends IncrementalProjectBuilder {
   }
   
   private String[] findCriticalResourcesChanged(final IResourceDelta delta) {
-    Stream<IResourceDelta> stream = Stream.of(delta.getAffectedChildren());
-    
-    List<URI> uris = stream.map((d) -> { return d.getResource().getLocationURI(); }).collect(Collectors.toList());
-        
-    for (IResourceDelta rd: delta.getAffectedChildren()) {
-      if (true);
+
+    if (delta == null) {
+      return null;
     }
+    
+    System.out.printf("Name of resource: %s", delta.getResource().getName());
+    
+    Stream<IResourceDelta> stream = flattenToStream(Arrays.stream(delta.getAffectedChildren()));
+
+    return stream.map(getCriticalResourceFilter()).collect(Collectors.toList()).toArray(new String[1]);
   }
   
-  private Func 
+  private Stream<IResourceDelta> flattenToStream(Stream<IResourceDelta> stream) {
+    return stream.flatMap((child) -> {
+      // return stream if there are affected children
+      if (child.getAffectedChildren().length > 0) {
+        return flattenToStream(Arrays.stream(child.getAffectedChildren()));
+      } else {
+        return Stream.empty();
+      }
+    });
+  }
+  
+  private Function<IResourceDelta, String> getCriticalResourceFilter() {
+    Function<IResourceDelta, String> filter = (delta) -> {
+      System.out.println(delta.getResource().getName());
+      return delta.getResource().getName();
+    };
+    
+    return filter;
+  }
 }
