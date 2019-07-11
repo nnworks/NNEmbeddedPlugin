@@ -137,21 +137,28 @@ public class ProjectConfigBuilder extends IncrementalProjectBuilder {
       return null;
     }
     
-    System.out.printf("Name of resource: %s", delta.getResource().getName());
+    System.out.printf("Name of resource: %s\n", delta.getResource().getName());
     
     Stream<IResourceDelta> stream = flattenToStream(Arrays.stream(delta.getAffectedChildren()));
 
     return stream.map(getCriticalResourceFilter()).collect(Collectors.toList()).toArray(new String[1]);
   }
   
+  /**
+   * Flatten all descendants to a single stream. There is an easier way to traverse the children (with a visitor), but this was nice to play with :-). 
+   * @param stream
+   * @return
+   */
   private Stream<IResourceDelta> flattenToStream(Stream<IResourceDelta> stream) {
     return stream.flatMap((child) -> {
+      // add child itself
+      Stream<IResourceDelta> childStream = Stream.of(child);
       // return stream if there are affected children
       if (child.getAffectedChildren().length > 0) {
-        return flattenToStream(Arrays.stream(child.getAffectedChildren()));
-      } else {
-        return Stream.empty();
-      }
+        childStream = Stream.concat(childStream, flattenToStream(Arrays.stream(child.getAffectedChildren())));
+      };
+      
+      return childStream;
     });
   }
   
